@@ -6,27 +6,71 @@ const { MessageMedia } = require('whatsapp-web.js');
 const fs = require('fs');
 const path = require('path');
 const { create } = require('domain');
+const { ChildProcess } = require('child_process');
+const { spawn } = require('child_process');
 
 let persons = [];
 
-const map={};
-const created={}
-const count={}
-async function converter(source, dest, message,index) {
+const map = {};
+const created = {}
+const count = {}
+async function converter(source1, dest, message, index) {
     console.log(index);
-    let command = `python .\\image2scan\\scan.py --image ${source} --dest ${dest} --index ${index}`;
-    console.log(command);
-    await exec(command, async (err, stdout, stderr) => {
-        if (err) {
-            console.error(`Error executing command: ${err}`);
-            return;
-        }
-        console.log(`Command output: ${stdout}`);
-        console.log('Command output done');
-        let pdfMedia = await MessageMedia.fromFilePath('./Image1.pdf');
-        // client.sendMessage(message.from, pdfMedia);
-        //   return;
-    });
+
+    let commands = []
+    // for(let i=1;i<=index;i++)
+    // {
+    //     let source=source1+i+".jpg";
+    //     index1=i;
+    //     let command = `python .\\image2scan\\scan.py --image ${source} --dest ${dest} --index ${index1}`;
+    //     commands.push(command);
+
+    // }
+    let n = count[message.from];
+    n = `${n}`
+    let destination = './' + (message.from).substring(0, 12) + "/\n";
+    n = destination + n;
+    console.log(n);
+    fs.writeFile('reader.txt', n, (err) => {
+
+        // In case of a error throw err.
+        if (err) throw err;
+    })
+    // console.log(commands);
+    let command1 = "python combiner.py"
+    commands.push(command1)
+    console.log(commands);
+    for (const command of commands) {
+        // console.log(command);
+        // await exec(command, async (err, stdout, stderr) => {
+        //     if (err) {
+        //         console.error(`Error executing command: ${err}`);
+        //         return;
+        //     }
+        //     console.log(`Command output: ${stdout}`);
+        //     console.log('Command output done');
+        //     // let pdfMedia = await MessageMedia.fromFilePath('./Image1.pdf');
+        //     // client.sendMessage(message.from, pdfMedia);
+        //     //   return;
+        // await exec(command, async (err, stdout, stderr) => {
+        //     if (err) {
+        //         console.error(`Error executing command: ${err}`);
+        //         return;
+        //     }
+        //     console.log(`Command output: ${stdout}`)
+        // });
+        // const { stdout, stderr } = await exec(command);
+        const childProcess = spawn(command);
+
+        // Terminate child process when the parent process is terminated
+        process.on('SIGTERM', () => childProcess.kill());
+        let pdfMedia = MessageMedia.fromFilePath('./Output.pdf');
+        client.sendMessage(message.from, pdfMedia);
+
+    }
+
+
+    // }
     console.log("Returning from converter");
 }
 
@@ -62,48 +106,43 @@ client.on('message', async (message) => {
     let msg = parse(message);
     console.log(msg);
     if (msg.command == "scan") {
-        
+
         map[message.from] = 1;
-        created[message.from]=0;
-        count[message.from]=1;
-        
+        created[message.from] = 0;
+        count[message.from] = 1;
+
         // client.sendMessage("Send your image one by one");
     }
     else if (msg.command == "done") {
-        map[message.from]=0;
-        
-        let image_path=__dirname+"\\"+(message.from).substring(0,12)+"\\Image";
-        for(let i=0;i<count[message.from];i++)
-        {
-            let j=i+1;
-            let y=image_path+j+".jpg";
-            console.log(j);
-            
-            let x=await converter(y, __dirname+"\\"+(message.from).substring(0,12),message,j);
-        }
+        map[message.from] = 0;
+
+        let image_path = __dirname + "\\" + (message.from).substring(0, 12) + "\\Image";
+        y = image_path
+
+        let x = await converter(y, __dirname + "\\" + (message.from).substring(0, 12), message, count[message.from]);
+
         // client.sendMessage("We are scanning these images");
     }
     if (map[message.from] == 1) {
         if (message.hasMedia) {
             const media = await message.downloadMedia();
-            
-            if(created[message.from]==0)
-            {
-                created[message.from]=1;
-                let f_name=(message.from).substring(0,12);
+
+            if (created[message.from] == 0) {
+                created[message.from] = 1;
+                let f_name = (message.from).substring(0, 12);
                 fs.mkdir(f_name, (err) => {
                     if (err) {
                         console.error(err);
                         return;
                     }
-                    
+
                 });
-                
+
             }
             let name = "Image" + count[message.from] + ".jpg";
             console.log(__dirname);
             count[message.from]++;
-            const filePath = path.resolve(__dirname+ `\\` + (message.from).substring(0,12), name);
+            const filePath = path.resolve(__dirname + `\\` + (message.from).substring(0, 12), name);
             fs.writeFileSync(filePath, media.data, { encoding: 'base64' });
             console.log('Attachment saved!');
 
