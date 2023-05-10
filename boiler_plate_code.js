@@ -8,70 +8,131 @@ const path = require('path');
 const { create } = require('domain');
 const { ChildProcess } = require('child_process');
 const { spawn } = require('child_process');
+const { waitForDebugger } = require('inspector');
+
+const scan_type = {}
+class Queue {
+    constructor() {
+        this.items = [];
+    }
+
+    // add an item to the back of the queue
+    enqueue(item) {
+        this.items.push(item);
+    }
+
+    // remove and return the front item from the queue
+    dequeue() {
+        return this.items.shift();
+    }
+
+    // return the front item of the queue without removing it
+    peek() {
+        return this.items[0];
+    }
+
+    // return true if the queue is empty, false otherwise
+    isEmpty() {
+        return this.items.length === 0;
+    }
+
+    // return the number of items in the queue
+    size() {
+        return this.items.length;
+    }
+}
+
+waiting_list = new Queue();
+
 
 let persons = [];
 
 const map = {};
 const created = {}
 const count = {}
-async function converter(source1, dest, message, index) {
+const qresolve = {}
+async function converter(source1, dest, message, index, args) {
     console.log(index);
 
     let commands = []
-    // for(let i=1;i<=index;i++)
-    // {
-    //     let source=source1+i+".jpg";
-    //     index1=i;
-    //     let command = `python .\\image2scan\\scan.py --image ${source} --dest ${dest} --index ${index1}`;
-    //     commands.push(command);
+    for (let i = 1; i <= index; i++) {
+        let source = source1 + i + ".jpg";
+        let index1 = i;
+        let command = `python .\\image2scan\\scan.py --image ${source} --dest ${dest} --index ${index1}`;
+        commands.push(command);
 
-    // }
+    }
     let n = count[message.from];
     n = `${n}`
     let destination = './' + (message.from).substring(0, 12) + "/\n";
-    n = destination + n;
-    console.log(n);
-    fs.writeFile('reader.txt', n, (err) => {
+    if (scan_type[message] == 0) {
+        n = destination + n + "\n" + args[0] + "\n" + "Image";
 
-        // In case of a error throw err.
+    }
+    else {
+        n = destination + n + "\n" + args[0] + "\n" + "Omage";
+    }
+    console.log("n ki value " + n);
+    fs.writeFile('./reader.txt', n, (err) => {
+
+
         if (err) throw err;
-    })
-    // console.log(commands);
+    });
+
     let command1 = "python combiner.py"
     commands.push(command1)
     console.log(commands);
-    for (const command of commands) {
-        // console.log(command);
-        // await exec(command, async (err, stdout, stderr) => {
-        //     if (err) {
-        //         console.error(`Error executing command: ${err}`);
-        //         return;
-        //     }
-        //     console.log(`Command output: ${stdout}`);
-        //     console.log('Command output done');
-        //     // let pdfMedia = await MessageMedia.fromFilePath('./Image1.pdf');
-        //     // client.sendMessage(message.from, pdfMedia);
-        //     //   return;
-        // await exec(command, async (err, stdout, stderr) => {
-        //     if (err) {
-        //         console.error(`Error executing command: ${err}`);
-        //         return;
-        //     }
-        //     console.log(`Command output: ${stdout}`)
-        // });
-        // const { stdout, stderr } = await exec(command);
-        const childProcess = spawn(command);
+    async function runCommands(commands) {
+        for (let i = 0; i < commands.length; i++) {
+            const command = commands[i];
+            const childProcess = spawn(command, { shell: true });
 
-        // Terminate child process when the parent process is terminated
-        process.on('SIGTERM', () => childProcess.kill());
-        let pdfMedia = MessageMedia.fromFilePath('./Output.pdf');
-        client.sendMessage(message.from, pdfMedia);
+            await new Promise((resolve, reject) => {
+                childProcess.stdout.on('data', (data) => {
+                    console.log(`Output from ${command}: ${data}`);
+                });
 
+                childProcess.stderr.on('data', (data) => {
+                    console.error(`Error from ${command}: ${data}`);
+                });
+
+                childProcess.on('close', (code) => {
+                    console.log(`${command} exited with code ${code}`);
+                    resolve();
+                });
+
+                childProcess.on('error', (err) => {
+                    reject(err);
+                });
+            });
+        }
+    }
+
+    await runCommands(commands)
+        .then(() =>
+            console.log('All commands executed successfully.')
+        )
+        .catch((err) => console.error(`Error executing commands: ${err}`));
+
+    let pdfMedia = await MessageMedia.fromFilePath("./" + (message.from).substring(0, 12) + `/${args[0]}.pdf`);
+    client.sendMessage(message.from, pdfMedia);
+    deletefolder("./" + (message.from).substring(0, 12));
+    waiting_list.dequeue();
+    map[message.from] = 0;
+    if (waiting_list.isEmpty() == false) {
+        let top_message = waiting_list.peek();
+        let top_msg = parse(top_message);
+        let top_args = top_msg.args;
+        let x = await converter(y, __dirname + "\\" + (top_message.from).substring(0, 12), top_message, count[top_message.from], top_args);
     }
 
 
     // }
+
+
+    // }
     console.log("Returning from converter");
+    // executeCommands();
 }
 
 
@@ -104,26 +165,92 @@ let flag = 0;
 let i = 1;
 client.on('message', async (message) => {
     let msg = parse(message);
+    let args = msg.args;
     console.log(msg);
-    if (msg.command == "scan") {
+    if(msg.command == "help")
+    {
+        let s="You are welcome on this whatsapp number. \n\n"
+        s=s+"This is a document handling bot and you can use it by sending commands.\n\n";
+        s+="Following are the commands which you can use : \n\n";
+        s+="1 '.conv' - This command converts multiple images to pdf without scanning them.\n";
+        s+="First send '.conv'  command , then send images , then send the command '.done' and the pdf's name.\n"
+        s+=".done<space><file_name>. For example '.done kartik' will make a pdf by name kartik.\n\n"
+        s+="2 '.scan' - This will scan the images and then convert them to pdf.\n"
+        s+="First send '.scan' command and then images and when you are done , send '.done' command as described above."
+        s+="\n\nNote - Don't use inverted commas in your command.\n"
+        client.sendMessage(message.from,s);
 
-        map[message.from] = 1;
-        created[message.from] = 0;
-        count[message.from] = 1;
+    }
+    if (msg.command == "scan") {
+        if (map[message.from] == 1) {
+            client.sendMessage(message.from, "Your another file already in queue,please wait");
+            qresolve[message.from] = 0;
+
+
+        }
+        else {
+            map[message.from] = 1;
+            created[message.from] = 0;
+            count[message.from] = 1;
+            qresolve[message.from] = 1;
+            scan_type[message] = 1;
+
+        }
+
 
         // client.sendMessage("Send your image one by one");
     }
+    else if (msg.command == "conv") {
+        if (map[message.from] == 1) {
+            client.sendMessage(message.from, "Your another file already in queue,please wait");
+            qresolve[message.from] = 0;
+
+        }
+        else {
+            map[message.from] = 1;
+            created[message.from] = 0;
+            count[message.from] = 1;
+            qresolve[message.from] = 1;
+            scan_type[message] = 0;
+
+
+        }
+
+
+        // client.sendMessage("Send your image one by one");
+    }
+
     else if (msg.command == "done") {
-        map[message.from] = 0;
+        // map[message.from]=0;
+        if (count[message.from] == 1) {
+            client.sendMessage(message.from, "Please send something first !!!!! ")
+            end_command(message);
+        }
+        else if (qresolve[message.from] == 1) {
+            let image_path = __dirname + "\\" + (message.from).substring(0, 12) + "\\Image";
+            y = image_path
+            if (waiting_list.isEmpty() == true) {
+                waiting_list.enqueue(message.from);
+                let x = await converter(y, __dirname + "\\" + (message.from).substring(0, 12), message, count[message.from], args);
+                map[message.from] = 0;
 
-        let image_path = __dirname + "\\" + (message.from).substring(0, 12) + "\\Image";
-        y = image_path
+            }
+            else {
+                waiting_list.enqueue(message);
+                console.log(waiting_list);
+            }
 
-        let x = await converter(y, __dirname + "\\" + (message.from).substring(0, 12), message, count[message.from]);
+
+        }
+        else {
+            client.sendMessage(message.from, "In queue !!!!!!!")
+        }
+
 
         // client.sendMessage("We are scanning these images");
     }
-    if (map[message.from] == 1) {
+    
+    if (map[message.from] == 1 && qresolve[message.from] == 1) {
         if (message.hasMedia) {
             const media = await message.downloadMedia();
 
@@ -152,15 +279,17 @@ client.on('message', async (message) => {
         }
 
     }
-    // console.log(message.from, message.body);
-    // var bot_reply = parse(message);
-    // if (bot_reply != "") {
-    //     client.sendMessage(message.from, bot_reply.trim());
-
-    // }
+    if (msg.command == "end") {
+        end_command(message);
+    }
 });
 
+function end_command(message) {
 
+    map[message.from] = 24;
+    client.sendMessage(message.from, "Command restarted");
+    deletefolder("./" + (message.from).substring(0, 12))
+}
 function parse(message) {
     var body = message.body;
     // console.log();
@@ -248,3 +377,12 @@ function register(sender, id) {
     return "You are registered now";
 }
 
+function deletefolder(folder_path) {
+    fs.rmdir(folder_path, { recursive: true }, (err) => {
+        if (err) {
+            console.error(err);
+        } else {
+            console.log('Folder deleted successfully');
+        }
+    });
+}

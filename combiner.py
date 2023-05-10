@@ -9,11 +9,13 @@ fdata=data.split("\n")
 print(fdata)
 dest=fdata[0]
 n=int(fdata[1])
+filename=fdata[2]
+file_type=fdata[3]
 n=n-1
 images=[]
 
 for i in range(0,n):
-    s=f'{dest}/Omage{i+1}.jpg'
+    s=f'{dest}/{file_type}{i+1}.jpg'
     images.append(s)
 
 print(images)
@@ -30,4 +32,5 @@ for fileName in fileNames:
     builder.insert_image(fileName)
     # Insert a paragraph break to avoid overlapping images.
 
-doc.save("Output.pdf")
+save_dest=f'{dest}/{filename}.pdf'
+doc.save(save_dest)
