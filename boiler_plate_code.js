@@ -114,7 +114,7 @@ async function converter(source1, dest, message, index, args) {
         )
         .catch((err) => console.error(`Error executing commands: ${err}`));
 
-    let pdfMedia = await MessageMedia.fromFilePath("./" + (message.from).substring(0, 12) + `/Image1.jpg`);
+    let pdfMedia = await MessageMedia.fromFilePath("./" + (message.from).substring(0, 12) + `/${args[0]}.pdf`);
     client.sendMessage(message.from, pdfMedia);
     deletefolder("./" + (message.from).substring(0, 12));
     waiting_list.dequeue();
