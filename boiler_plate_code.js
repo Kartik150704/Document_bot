@@ -269,7 +269,7 @@ client.on('message', async (message) => {
             let name = "Image" + count[message.from] + ".jpg";
             console.log(__dirname);
             count[message.from]++;
-            const filePath = path.resolve(__dirname + `\\` + (message.from).substring(0, 12), name);
+            const filePath = path.resolve(__dirname + `/` + (message.from).substring(0, 12), name);
             fs.writeFileSync(filePath, media.data, { encoding: 'base64' });
             console.log('Attachment saved!');
 
