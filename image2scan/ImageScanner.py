@@ -209,7 +209,7 @@ class ImageScanner:
         layout_fun = img2pdf.get_layout_fun(din_a4_format)
 
         # pdf_filename = f"{date.today()}-scan-{img_filename}"
-        pdf_filename = f"{img_filename}"+f"{self.index}"
+        pdf_filename = img_filename + str(self.index)
         with open(f"{self.destination}/{pdf_filename}.pdf", "wb") as pdf_file:
             pdf_file.write(img2pdf.convert("result.jpg", layout_fun=layout_fun))
         im=Image.open("result.jpg")
