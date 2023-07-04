@@ -79,7 +79,7 @@ async function converter(source1, dest, message, index, args) {
         if (err) throw err;
     });
 
-    let command1 = "python3 combiner.py"
+    let command1 = "python combiner.py"
     commands.push(command1)
     console.log(commands);
     async function runCommands(commands) {
