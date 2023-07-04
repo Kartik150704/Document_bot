@@ -58,7 +58,7 @@ async function converter(source1, dest, message, index, args) {
     for (let i = 1; i <= index; i++) {
         let source = source1 + i + ".jpg";
         let index1 = i;
-        let command = `python ./image2scan/scan.py --image ${source} --dest ${dest} --index ${index1}`;
+        let command = `python3 ./image2scan/scan.py --image ${source} --dest ${dest} --index ${index1}`;
         commands.push(command);
 
     }
