@@ -169,15 +169,22 @@ client.on('message', async (message) => {
     console.log(msg);
     if(msg.command == "help")
     {
-        let s="You are welcome on this whatsapp number. \n\n"
-        s=s+"This is a document handling bot and you can use it by sending commands.\n\n";
-        s+="Following are the commands which you can use : \n\n";
-        s+="1 '.conv' - This command converts multiple images to pdf without scanning them.\n";
-        s+="First send '.conv'  command , then send images , then send the command '.done' and the pdf's name.\n"
-        s+=".done<space><file_name>. For example '.done kartik' will make a pdf by name kartik.\n\n"
-        s+="2 '.scan' - This will scan the images and then convert them to pdf.\n"
-        s+="First send '.scan' command and then images and when you are done , send '.done' command as described above."
-        s+="\n\nNote - Don't use inverted commas in your command.\n"
+        let s = "You are welcome on this WhatsApp number.\n\n"
+        s += "This is a document handling bot created by Kartik Yadav. Special thanks to Sahil Mangla and Anant Prakash for their contributions.\n"
+        s += "If you have any questions or need assistance, please feel free to reach out to us.\n"
+        s += "Contact Email: kartik150704@gmail.com\n\n"
+        s += "Here are the available commands:\n\n"
+        s += "1. '.conv' - This command converts multiple images to PDF without scanning them.\n"
+        s += "   To use this command, follow these steps:\n"
+        s += "   - Send the command '.conv' to initiate the conversion.\n"
+        s += "   - Send the images you want to convert.\n"
+        s += "   - Send the command '.done <file_name>' to specify the PDF's name. For example, '.done kartik' will create a PDF named 'kartik'.\n\n"
+        s += "2. '.scan' - This command scans the images and then converts them into a PDF.\n"
+        s += "   To use this command, follow these steps:\n"
+        s += "   - Send the command '.scan' to initiate the scanning and conversion process.\n"
+        s += "   - Send the images you want to scan and convert.\n"
+        s += "   - When you are done, send the command '.done <file_name>' to specify the PDF's name as mentioned above.\n\n"
+        s += "Note: Please avoid using inverted commas in your commands.\n"
         client.sendMessage(message.from,s);
 
     }
@@ -189,6 +196,7 @@ client.on('message', async (message) => {
 
         }
         else {
+            client.sendMessage(message.from, "Scanning started , send your images one by one \n.");
             map[message.from] = 1;
             created[message.from] = 0;
             count[message.from] = 1;
@@ -207,6 +215,7 @@ client.on('message', async (message) => {
 
         }
         else {
+            client.sendMessage(message.from, "Scanning started , send your images one by one \n.");
             map[message.from] = 1;
             created[message.from] = 0;
             count[message.from] = 1;
@@ -231,6 +240,7 @@ client.on('message', async (message) => {
             y = image_path
             if (waiting_list.isEmpty() == true) {
                 waiting_list.enqueue(message.from);
+                client.sendMessage(message.from, "Converting your images to a final pdf .......")
                 let x = await converter(y, __dirname + "/" + (message.from).substring(0, 12), message, count[message.from], args);
                 map[message.from] = 0;
 
