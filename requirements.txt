@@ -1,4 +1,4 @@
-aspose-words==23.3.0
+aspose-words==23.6.0
 Aspose.Slides==23.4.0
 beautifulsoup4==4.12.2
 certifi==2022.12.7
