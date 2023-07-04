@@ -123,7 +123,7 @@ async function converter(source1, dest, message, index, args) {
         let top_message = waiting_list.peek();
         let top_msg = parse(top_message);
         let top_args = top_msg.args;
-        let x = await converter(y, __dirname + "\\" + (top_message.from).substring(0, 12), top_message, count[top_message.from], top_args);
+        let x = await converter(y, __dirname + "/" + (top_message.from).substring(0, 12), top_message, count[top_message.from], top_args);
     }
 
 
@@ -227,11 +227,11 @@ client.on('message', async (message) => {
             end_command(message);
         }
         else if (qresolve[message.from] == 1) {
-            let image_path = __dirname + "\\" + (message.from).substring(0, 12) + "\\Image";
+            let image_path = __dirname + "/" + (message.from).substring(0, 12) + "/Image";
             y = image_path
             if (waiting_list.isEmpty() == true) {
                 waiting_list.enqueue(message.from);
-                let x = await converter(y, __dirname + "\\" + (message.from).substring(0, 12), message, count[message.from], args);
+                let x = await converter(y, __dirname + "/" + (message.from).substring(0, 12), message, count[message.from], args);
                 map[message.from] = 0;
 
             }
