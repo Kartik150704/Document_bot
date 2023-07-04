@@ -201,7 +201,7 @@ class ImageScanner:
         
         # Create the scan image in order to create PDF from it afterwards
         # image_filename = f"{img_filename}"+f"{self.index}"
-        cv2.imwrite(f"{os.getcwd()}/result.jpg", img_data)
+        cv2.imwrite("{}/result.jpg".format(os.getcwd()), img_data)
         
         # cv2.imwrite(f"{self.destination}/{image_filename}",img_data)
         # Specifying DIN A4 format
