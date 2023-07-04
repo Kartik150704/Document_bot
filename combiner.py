@@ -1,36 +1,41 @@
-n=1
+from PIL import Image
+from reportlab.pdfgen import canvas
+import os
 
-data=1
+n = 1
+
+data = 1
 with open('./reader.txt', 'r') as file:
-    data=(file.read())
-    
+    data = (file.read())
 
-fdata=data.split("\n")
+fdata = data.split("\n")
 print(fdata)
-dest=fdata[0]
-n=int(fdata[1])
-filename=fdata[2]
-file_type=fdata[3]
-n=n-1
-images=[]
+dest = fdata[0]
+n = int(fdata[1])
+filename = fdata[2]
+file_type = fdata[3]
+n = n - 1
+images = []
 
-for i in range(0,n):
-    s = dest + '/' + file_type + str(i+1) + '.jpg'
+for i in range(0, n):
+    s = f'{dest}/{file_type}{i + 1}.jpg'
     images.append(s)
 
 print(images)
-import aspose.words as aw
 
-# fileNames = [ "./Image1.jpg", "./image2.jpg" ,"./image3.jpg"]
+# Function to convert images to PDF
+def images_to_pdf(image_paths, pdf_path):
+    c = canvas.Canvas(pdf_path)
+    for image_path in image_paths:
+        img = Image.open(image_path)
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+        c.drawInlineImage(img, 0, 0, width=c._pagesize[0], height=c._pagesize[1])
+        c.showPage()
+    c.save()
 
-fileNames=images
+# Call the function to convert images to PDF
+save_dest = f'{dest}/{filename}.pdf'
+images_to_pdf(images, save_dest)
 
-doc = aw.Document()
-builder = aw.DocumentBuilder(doc)
-
-for fileName in fileNames:
-    builder.insert_image(fileName)
-    # Insert a paragraph break to avoid overlapping images.
-
-save_dest = dest + '/' + filename + '.pdf'
-doc.save(save_dest)
+print(f"PDF file created successfully: {save_dest}")
