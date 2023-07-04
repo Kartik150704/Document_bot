@@ -15,7 +15,7 @@ n=n-1
 images=[]
 
 for i in range(0,n):
-    s=f'{dest}/{file_type}{i+1}.jpg'
+    s = dest + '/' + file_type + str(i+1) + '.jpg'
     images.append(s)
 
 print(images)
@@ -32,5 +32,5 @@ for fileName in fileNames:
     builder.insert_image(fileName)
     # Insert a paragraph break to avoid overlapping images.
 
-save_dest=f'{dest}/{filename}.pdf'
+save_dest = dest + '/' + filename + '.pdf'
 doc.save(save_dest)
