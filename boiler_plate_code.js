@@ -1,7 +1,7 @@
 const qrcode = require('qrcode-terminal');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth ,NoAuth} = require('whatsapp-web.js');
 const { MessageMedia } = require('whatsapp-web.js');
 const fs = require('fs');
 const path = require('path');
@@ -139,7 +139,7 @@ async function converter(source1, dest, message, index, args) {
 
 
 const client = new Client({
-    authStrategy: new LocalAuth(),
+    authStrategy: new NoAuth(),
     puppeteer: {
         headless: true,
         args: [
