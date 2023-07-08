@@ -22,7 +22,7 @@ The WhatsApp Document Scanning Bot is a powerful tool that allows you to scan im
 
 ## Video Preview
 
-To see a video demonstration of how to use the WhatsApp Document Scanning Bot, please check out this [video link]([https://drive.google.com/file/d/1t2G1zvEXvBve2QMQ14IalCvgbGhCPlaR/view?usp=drive_link](https://drive.google.com/file/d/1I6MrkYy7lOA1caffA5IO8pMoEsNHL3eV/view?usp=drive_link)).
+To see a video demonstration of how to use the WhatsApp Document Scanning Bot, please check out this [video link](https://drive.google.com/file/d/1I6MrkYy7lOA1caffA5IO8pMoEsNHL3eV/view?usp=drive_link)
 
 ## Contributing
 
