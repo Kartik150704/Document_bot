@@ -28,7 +28,6 @@ The WhatsApp Document Scanning Bot is a powerful tool that allows you to scan im
 https://github.com/Kartik150704/Document_bot/assets/108309065/44652c1a-6ecc-40c0-bfbf-0d7ffe9508dc
 
 
-https://github.com/Kartik150704/Document_bot/assets/108309065/6ef5d0e8-91b5-4891-84b7-d36b5f5686bd
 
 
 
